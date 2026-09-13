@@ -1,0 +1,19 @@
+[ping]
+ttl = 128
+timeout = 1.0
+retry_count = 3
+interval = 1.0
+size = 60
+df = false
+
+[tui]
+view_recent = 60
+view_success = [green]O
+view_fail = [red]X
+view_expired = [yellow]▲
+
+[log]
+result_directory = ./booyaa_log/ping
+ping_success = SUCCESS
+ping_fail = FAIL
+ping_expired = EXPIRED

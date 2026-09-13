@@ -1,9 +1,13 @@
 [project]
 name = "mping"
 version = "0.1.0"
-description = ""
+description = "複数宛先への同時ping実行・リアルタイム表示CLIツール"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "common",
+    "rich>=13",
+    "icmplib>=3; sys_platform == 'linux'",
+]
 
 [project.scripts]
 mping = "mping.cli:main"
@@ -14,3 +18,18 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mping"]
+
+[tool.uv.sources]
+common = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+# Windows環境で `%TEMP%\pytest-of-<user>` にアクセス権限の問題があり
+# (この配下のディレクトリ一覧取得でPermissionErrorになる事例を確認)、
+# tmp_path系フィクスチャの生成先をリポジトリ直下の作業用ディレクトリに固定する。
+addopts = "--basetemp=.pytest_tmp"
