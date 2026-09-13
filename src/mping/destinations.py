@@ -13,8 +13,18 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def _split_item(item: str) -> list[str]:
+    """1つの引数(または1行)を`,`区切りで複数宛先に分割する.
+
+    オリジナル実装(`multi_ping.py`)踏襲で、CLI位置引数・リストファイルの各行とも
+    `mping 1.1.1.1,8.8.8.8` のようにカンマ区切りで複数宛先をまとめて指定できる。
+    前後の空白は除去し、連続カンマ・末尾カンマ等による空要素は無視する。
+    """
+    return [part.strip() for part in item.split(",") if part.strip()]
+
+
 def _read_list_file(path: Path) -> list[str]:
-    """1行1宛先のリストファイルを読み込む.
+    """1行1宛先(または`,`区切りで複数宛先)のリストファイルを読み込む.
 
     空行と `#` で始まるコメント行は無視する。
     """
@@ -24,7 +34,7 @@ def _read_list_file(path: Path) -> list[str]:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        result.append(stripped)
+        result.extend(_split_item(stripped))
     return result
 
 
@@ -32,10 +42,15 @@ def resolve_destinations(
     targets: list[str] | None,
     list_file: str | None,
 ) -> list[str]:
-    """位置引数とリストファイルから宛先一覧を確定する(重複は最初の出現順を維持して排除)."""
+    """位置引数とリストファイルから宛先一覧を確定する(重複は最初の出現順を維持して排除).
+
+    位置引数・リストファイルの各行とも、`,`区切りで複数宛先をまとめて指定できる
+    (例: `mping 1.1.1.1,8.8.8.8,google.co.jp`)。
+    """
     raw: list[str] = []
     if targets:
-        raw.extend(targets)
+        for item in targets:
+            raw.extend(_split_item(item))
     if list_file:
         raw.extend(_read_list_file(Path(list_file)))
 

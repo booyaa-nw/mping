@@ -139,9 +139,10 @@ async def _async_main(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
 
-    if not pingable_targets:
-        print("解決できるIPv4宛先がありませんでした。", file=sys.stderr)
-        return 1
+    # 全宛先が名前解決に失敗した場合でも、一覧表示自体は行う(pingable_targetsが
+    # 空なら`PingRunner`は何もせず即座に戻り、テーブルを表示したまま終了する)。
+    # 「一覧には表示しますがpingは実行しません」という上の警告と矛盾しないよう、
+    # ここで打ち切らない。
 
     logger = ResultLogger(
         settings.result_directory,
